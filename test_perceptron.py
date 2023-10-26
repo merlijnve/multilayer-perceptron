@@ -53,9 +53,11 @@ def main():
     learning_curve = []
     for e in range(epochs):
         for i, X in enumerate(data):
+            accuracies = []
             inputs = np.array([X[0], X[1]])
             p.train(inputs, targets[i])
-            learning_curve.append(calc_accuracy(data, targets))
+            accuracies.append(calc_accuracy(data, targets))
+        learning_curve.append(np.mean(accuracies))
         print("Epoch %4d" % e, "Accuracy: %.2f" % learning_curve[-1])
 
     plot_learning_curve(learning_curve)
