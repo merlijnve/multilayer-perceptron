@@ -6,7 +6,7 @@ class Perceptron:
     def __init__(self, size):
         self.weights = np.random.uniform(low=-1.0, high=1.0, size=size)
 
-    def estimate(self, inputs):
+    def estimate(self, inputs: np.ndarray):
         if len(inputs) != len(self.weights):
             raise ValueError("Number of inputs must match number of weights")
 
@@ -15,7 +15,7 @@ class Perceptron:
         output = np.sign(sum)
         return output
 
-    def train(self, inputs, target):
+    def train(self, inputs: np.ndarray, target: np.ndarray):
         if len(inputs) != len(self.weights):
             raise ValueError("Number of inputs must match number of weights")
 
