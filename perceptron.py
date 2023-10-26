@@ -16,7 +16,7 @@ class Perceptron:
         output = np.sign(sum)
         return output
 
-    def train(self, inputs: ndarray, target: ndarray):
+    def train(self, inputs: ndarray, target: float):
         if len(inputs) != len(self.weights):
             raise ValueError("Number of inputs must match number of weights")
 
