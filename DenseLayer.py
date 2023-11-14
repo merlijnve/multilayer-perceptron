@@ -1,11 +1,17 @@
 import numpy as np
 from numpy import ndarray
+from activation_functions import relu
+from activation_functions import softmax
 
 
 class DenseLayer:
     def __init__(self, input_size, output_size, activation):
+        if activation == 'relu':
+            self.activation = relu
+        elif activation == 'softmax':
+            self.activation = softmax
+
         self.learning_rate = 0.1
-        self.activation = activation
 
         np.random.seed(42)
         self.bias = np.zeros(output_size)
