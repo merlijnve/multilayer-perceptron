@@ -1,15 +1,11 @@
 import numpy as np
 from numpy import ndarray
-from activation_functions import relu
-from activation_functions import softmax
 
 
 class DenseLayer:
     def __init__(self, input_size, output_size, activation):
-        if activation == 'relu':
-            self.activation = relu
-        elif activation == 'softmax':
-            self.activation = softmax
+        self.output = None
+        self.activation = activation
 
         self.learning_rate = 0.1
 
@@ -21,5 +17,20 @@ class DenseLayer:
     def forward(self, inputs: ndarray):
         if len(inputs) != len(self.weights):
             raise ValueError("Number of inputs must match number of weights")
-        sum = self.activation(np.dot(inputs, self.weights) + self.bias)
-        return sum
+        self.inputs = inputs
+        self.output = self.activation.function(
+            np.dot(inputs, self.weights) + self.bias)
+        return self.output
+
+    def backward(self, loss_output):
+        output_gradient = loss_output * self.activation.derivative(self.output)
+        # print("output gradient", output_gradient)
+        input_gradient = np.dot(output_gradient, self.weights.T)
+
+        self.weights -= self.learning_rate * \
+            np.outer(self.inputs.T, output_gradient)
+        self.bias -= self.learning_rate * output_gradient
+
+        # print("W", np.sum(self.weights))
+        # print("B", np.sum(self.bias))
+        return input_gradient
