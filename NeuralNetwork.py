@@ -1,10 +1,8 @@
-from DenseLayer import DenseLayer
-from typing import List
-import random
-import numpy as np
 import matplotlib.pyplot as plt
+from typing import List
 
-random.seed(4)
+from DenseLayer import DenseLayer
+from loss_functions import cross_entropy_loss
 
 
 class NeuralNetwork:
@@ -27,39 +25,36 @@ class NeuralNetwork:
             prev_layer_outputs = layer.weights.shape[1]
         self.layers = layers
 
-    def binary_cross_entropy_loss(self, targets, outputs):
-        return -np.sum(targets * np.log(outputs) + (1 - targets) * np.log(1 - outputs))
-
-    # TODO: move this to a loss function class
-    def cross_entropy_loss(self, targets, outputs):
-        return -np.sum(targets * np.log(outputs))
-
     def feedforward(self, inputs):
         for layer in self.layers:
             inputs = layer.forward(inputs)
         return inputs
 
-    def backpropagate(self, targets, outputs):
-        # print("targets", targets)
-        # print("outputs", outputs)
-        loss = targets - outputs
-        print(targets, outputs, loss)
+    def backpropagate(self, target, outputs):
+        loss = target - outputs
         for layer in reversed(self.layers):
             loss = layer.backward(loss)
 
-    def train(self, inputs, targets, epochs):
-        learning_curve = []
-        for epoch in range(epochs):
-            print("Epoch %4d" % epoch)
-            # TODO: shuffle inputs and targets
-            i = random.randint(0, len(inputs) - 1)
-            # for i, _ in enumerate(inputs):
-            print(i)
-            outputs = self.feedforward(inputs[i])
-            self.backpropagate(targets[i], outputs)
-            cross_entropy_loss = self.binary_cross_entropy_loss(targets[i], outputs)
-            print("Loss %.2f" % cross_entropy_loss)
-            learning_curve.append(cross_entropy_loss)
+    def training_step(self, input, target):
+        outputs = self.feedforward(input)
+        self.backpropagate(target, outputs)
 
-        plt.plot(learning_curve)
-        plt.show()
+    # TODO: add validation set
+    # TODO: add early stopping
+    # TODO: add minibatch training
+    def fit(self, inputs, targets, epochs=100, plot_loss=False):
+        learning_curve = []
+
+        for epoch in range(epochs):
+            for i, _ in enumerate(inputs):
+                self.training_step(inputs[i], targets[i])
+
+            outputs = [self.feedforward(i) for i in inputs]
+            loss = cross_entropy_loss(targets, outputs)
+            print("Epoch %3d/%d - Training loss: %.2f" %
+                  (epoch + 1, epochs, loss))
+            learning_curve.append(loss)
+
+        if plot_loss:
+            plt.plot(learning_curve)
+            plt.show()

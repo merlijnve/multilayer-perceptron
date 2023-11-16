@@ -1,11 +1,12 @@
 import numpy as np
 from DenseLayer import DenseLayer
 from NeuralNetwork import NeuralNetwork
-from activation_functions import Softmax, Sigmoid
+from activation_functions import Softmax, Sigmoid, ReLU
 
 n = NeuralNetwork([
-    DenseLayer(2, 2, Sigmoid()),
-    DenseLayer(2, 2, Sigmoid())
+    DenseLayer(2, 256, Sigmoid()),
+    DenseLayer(256, 256, Sigmoid()),
+    DenseLayer(256, 2, Softmax())
 ])
 
 X = np.array([[0.0, 0.0],
@@ -15,18 +16,17 @@ X = np.array([[0.0, 0.0],
 
 
 y = np.array([
+    [0.0, 1.0],
+    [1.0, 0.0],
     [1.0, 0.0],
     [0.0, 1.0],
-    [0.0, 1.0],
-    [1.0, 0.0]
 ])
 
 
-n.train(X, y, 100)
+n.fit(X, y, 50, plot_loss=True)
 
 print("GUESSES")
-print(n.feedforward([0.0, 0.0]))
-print(n.feedforward([1.0, 0.0]))
-print(n.feedforward([0.0, 1.0]))
-print(n.feedforward([1.0, 1.0]))
-
+# Test the trained network
+for inputs in X:
+    prediction = n.feedforward(inputs)
+    print(f"Input: {inputs}, Prediction: {prediction.round(2)}")
