@@ -9,6 +9,7 @@ cancer_data = pd.read_csv('breast_cancer_data.csv', index_col=0, header=None)
 # categorize the diagnosis column
 cancer_data = pd.get_dummies(cancer_data, dtype='float')
 
+# TODO: make preprocessing a layer
 # apply z-score normalization to feature columns
 cancer_data.iloc[:, :-2] = normalization(cancer_data.iloc[:, :-2])
 print(cancer_data.head())
