@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from typing import List
 
 from DenseLayer import DenseLayer
-from loss_functions import cross_entropy_loss
+from support_functions import cross_entropy_loss
 
 
 class NeuralNetwork:
