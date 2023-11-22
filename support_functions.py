@@ -1,12 +1,15 @@
 import numpy as np
+import pandas as pd
 
 
-def normalization(x: np.ndarray):
-    mean = np.mean(x)
-    std_dev = np.std(x)
+def normalization(x):
+    if isinstance(x, pd.DataFrame):
+        x = x.to_numpy()
+    mean = np.mean(x, axis=len(x.shape) - 1, keepdims=True)
+    std_dev = np.std(x, axis=len(x.shape) - 1, keepdims=True)
 
     x_normal = (x - mean) / std_dev
-    return x_normal
+    return pd.DataFrame(x_normal)
 
 
 def binary_cross_entropy_loss(targets, outputs):

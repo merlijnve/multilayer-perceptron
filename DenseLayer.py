@@ -7,7 +7,7 @@ class DenseLayer:
         self.output = None
         self.activation = activation
 
-        self.learning_rate = 1
+        self.learning_rate = 0.5
 
         self.bias = np.zeros(output_size)
         self.weights = np.random.default_rng(42).uniform(

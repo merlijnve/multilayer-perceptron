@@ -1,7 +1,8 @@
 import numpy as np
 from DenseLayer import DenseLayer
 from NeuralNetwork import NeuralNetwork
-from activation_functions import Softmax, Sigmoid, ReLU
+from activation_functions import Softmax, Sigmoid
+
 
 n = NeuralNetwork([
     DenseLayer(2, 256, Sigmoid()),
