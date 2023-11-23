@@ -1,6 +1,6 @@
 from DenseLayer import DenseLayer
 from NeuralNetwork import NeuralNetwork
-from activation_functions import Softmax, Sigmoid
+from activation_functions import Softmax, Sigmoid, ReLU
 from support_functions import normalization
 import pandas as pd
 
@@ -14,7 +14,8 @@ cancer_data = pd.get_dummies(cancer_data, dtype='float')
 cancer_data.iloc[:, :-2] = normalization(cancer_data.iloc[:, :-2])
 print(cancer_data.head())
 
-X = cancer_data.iloc[:, :-2].to_numpy()
+
+X = cancer_data.iloc[:, :12].to_numpy()
 y = cancer_data.iloc[:, -2:].to_numpy()
 
 n = NeuralNetwork([
@@ -23,17 +24,10 @@ n = NeuralNetwork([
     DenseLayer(16, 2, Softmax())
 ])
 
-n.fit(X, y, epochs=200, plot_loss=True)
-
-# TODO: export model
-# TODO: train val test split
-# TODO: validation accuracy
+n.fit(X, y, epochs=300, plot_loss=True)
 
 correct = []
 for i in range(len(X)):
     pred = n.feedforward(X[i])
-    if pred.round(0)[0] == y[i][0]:
-        correct.append(1)
-    else:
-        correct.append(0)
-print("Training accuracy: ", sum(correct) / len(X))
+    correct.append(pred.round(0)[0] == y[i][0])
+print("Accuracy: ", sum(correct) / len(X))
