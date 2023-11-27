@@ -13,9 +13,9 @@ def normalization(x):
 
 
 def binary_cross_entropy_loss(targets, outputs):
-    return -np.sum(targets * np.log(outputs) + (1 - targets) *
-                   np.log(1 - outputs)) / len(targets)
+    return -np.mean(targets * np.log(outputs) + (1 - targets) *
+                    np.log(1 - outputs))
 
 
 def cross_entropy_loss(targets, outputs):
-    return -np.sum(targets * np.log(outputs)) / len(targets)
+    return -np.mean(targets * np.log(outputs))

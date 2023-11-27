@@ -1,8 +1,10 @@
+import pandas as pd
+
 from NeuralNetwork import NeuralNetwork
 from DenseLayer import DenseLayer
 from NormalizationLayer import NormalizationLayer
 from activation_functions import Softmax, Sigmoid
-import pandas as pd
+
 
 cancer_data = pd.read_csv('breast_cancer_data.csv', index_col=0, header=None)
 
@@ -19,9 +21,9 @@ n = NeuralNetwork([
     DenseLayer(16, 2, Softmax())
 ])
 
-n.fit(X, y, epochs=70, plot_loss=False)
+n.fit(X, y, epochs=200, plot_loss=True)
 
 predictions = n.predict(X)
 
 correct = predictions[:, 0].round(0) == y[:, 0]
-print("Accuracy: ", sum(correct) / len(X))
+print("Train accuracy: ", sum(correct) / len(X))
