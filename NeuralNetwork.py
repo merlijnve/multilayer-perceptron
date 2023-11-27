@@ -3,7 +3,8 @@ from typing import List
 import numpy as np
 
 from DenseLayer import DenseLayer
-from support_functions import cross_entropy_loss, binary_cross_entropy_loss
+from support_functions import binary_cross_entropy_loss
+from NormalizationLayer import NormalizationLayer
 
 
 class NeuralNetwork:
@@ -18,24 +19,38 @@ class NeuralNetwork:
                 raise ValueError(
                     "Number of inputs must match outputs of previous layer")
 
-    def __init__(self, layers: List[DenseLayer]):
+    def __check_preprocessing_layer(self, layer, index):
+        if isinstance(layer, NormalizationLayer) and index != 0:
+            raise ValueError("Preprocessing layer must be first layer")
+
+    def __init__(self, layers: List[NormalizationLayer | DenseLayer]):
         prev_layer_outputs = None
-        for layer in layers:
-            self.__check_dtype(layer)
-            self.__check_inputs_outputs(prev_layer_outputs, layer)
-            prev_layer_outputs = layer.weights.shape[1]
+        for index, layer in enumerate(layers):
+            if isinstance(layer, NormalizationLayer):
+                self.__check_preprocessing_layer(layer, index)
+            if isinstance(layer, DenseLayer):
+                self.__check_dtype(layer)
+                self.__check_inputs_outputs(prev_layer_outputs, layer)
+                prev_layer_outputs = layer.weights.shape[1]
         self.layers = layers
         self.best_model = None
 
+    def predict(self, inputs):
+        if isinstance(self.layers[0], NormalizationLayer):
+            inputs = self.layers[0].transform(inputs)
+        return np.array([self.feedforward(i) for i in inputs])
+
     def feedforward(self, inputs):
         for layer in self.layers:
-            inputs = layer.forward(inputs)
+            if isinstance(layer, DenseLayer):
+                inputs = layer.forward(inputs)
         return inputs
 
     def backpropagate(self, target, outputs):
         loss = target - outputs
         for layer in reversed(self.layers):
-            loss = layer.backward(loss)
+            if isinstance(layer, DenseLayer):
+                loss = layer.backward(loss)
 
     def training_step(self, input, target):
         outputs = self.feedforward(input)
@@ -57,6 +72,12 @@ class NeuralNetwork:
 
         inputs_train, inputs_val, targets_train, targets_val = self.split(
             inputs, targets)
+
+        if isinstance(self.layers[0], NormalizationLayer):
+            print("Fitting normalization layer")
+            inputs_train = self.layers[0].fit_transform(inputs_train)
+            inputs_val = self.layers[0].transform(inputs_val)
+
         for epoch in range(epochs):
             inputs_train, targets_train = self.shuffle(
                 inputs_train, targets_train, rng)

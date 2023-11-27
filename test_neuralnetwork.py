@@ -42,7 +42,8 @@ def test_shuffle():
 def test_split():
     inputs_train, inputs_val, targets_train, targets_val = n.split(X, y, 0.2)
     print("inputs train", inputs_train, "\ninputs val",
-          inputs_val, "\ntargets train", targets_train, "\ntargets val", targets_val)
+          inputs_val, "\ntargets train", targets_train, "\ntargets val",
+          targets_val)
 
 
 # test_shuffle()
