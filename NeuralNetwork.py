@@ -71,7 +71,7 @@ class NeuralNetwork:
     def save_best_model(self, val_loss, epoch):
         if self.best_val_loss is None:
             self.best_val_loss = val_loss
-        if val_loss < self.best_val_loss:
+        if val_loss <= self.best_val_loss:
             self.best_val_loss = val_loss
             self.best_epoch = epoch
             self.best_layers = copy.deepcopy(self.layers)
@@ -120,7 +120,10 @@ class NeuralNetwork:
 
         print("Best epoch: %d - Val loss: %.4f" %
               (self.best_epoch, self.best_val_loss))
-        pickle.dump(self, open("best_model.pkl", "wb"))
+        print("Exporting best_model%.3f.pkl" %
+              self.best_val_loss)
+        pickle.dump(self, open("best_model%.3f.pkl" %
+                    self.best_val_loss, "wb"))
         if plot_loss:
             plt.title("Cross entropy loss for training and validation")
             plt.plot(train_learning_curve, label='Training loss')

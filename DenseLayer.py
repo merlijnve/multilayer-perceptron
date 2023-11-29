@@ -3,11 +3,11 @@ from numpy import ndarray
 
 
 class DenseLayer:
-    def __init__(self, input_size, output_size, activation):
+    def __init__(self, input_size, output_size, activation,
+                 learning_rate=0.01):
         self.output = None
         self.activation = activation
-
-        self.learning_rate = 0.03
+        self.learning_rate = learning_rate
 
         self.bias = np.zeros(output_size)
         self.weights = np.random.default_rng(42).uniform(

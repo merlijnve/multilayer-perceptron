@@ -1,29 +1,33 @@
-import pandas as pd
+import numpy as np
 
 from NeuralNetwork import NeuralNetwork
 from DenseLayer import DenseLayer
 from NormalizationLayer import NormalizationLayer
 from activation_functions import Softmax, Sigmoid
+from support_functions import read_cancer_dataset, calc_opposite_class
 
 
-cancer_data = pd.read_csv('breast_cancer_data.csv', index_col=0, header=None)
+def main():
+    cancer_data = read_cancer_dataset()
 
-# categorize the diagnosis column
-cancer_data = pd.get_dummies(cancer_data, dtype='float')
+    X = cancer_data[:, 1:]
+    y = np.column_stack(
+        [cancer_data[:, 0], calc_opposite_class(cancer_data[:, 0])])
 
-X = cancer_data.iloc[:, :12].to_numpy()
-y = cancer_data.iloc[:, -2:].to_numpy()
+    n = NeuralNetwork([
+        NormalizationLayer(),
+        DenseLayer(X.shape[1], 64, Sigmoid(), learning_rate=0.01),
+        DenseLayer(64, 64, Sigmoid(), learning_rate=0.01),
+        DenseLayer(64, 2, Softmax(), learning_rate=0.01)
+    ])
 
-n = NeuralNetwork([
-    NormalizationLayer(),
-    DenseLayer(X.shape[1], 16, Sigmoid()),
-    DenseLayer(16, 16, Sigmoid()),
-    DenseLayer(16, 2, Softmax())
-])
+    n.fit(X, y, epochs=200, plot_loss=True)
 
-n.fit(X, y, epochs=200, plot_loss=True)
+    predictions = n.predict(X)
 
-predictions = n.predict(X)
+    correct = predictions[:, 0].round(0) == y[:, 0]
+    print("Train accuracy: ", sum(correct) / len(X))
 
-correct = predictions[:, 0].round(0) == y[:, 0]
-print("Train accuracy: ", sum(correct) / len(X))
+
+if __name__ == '__main__':
+    main()
