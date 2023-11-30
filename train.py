@@ -18,15 +18,16 @@ def main():
         NormalizationLayer(),
         DenseLayer(X.shape[1], 64, Sigmoid(), learning_rate=0.01),
         DenseLayer(64, 64, Sigmoid(), learning_rate=0.01),
-        DenseLayer(64, 2, Softmax(), learning_rate=0.01)
-    ])
+        DenseLayer(64, 2, Softmax(), learning_rate=0.1)
+    ], early_stopping_n_epochs=20)
 
-    n.fit(X, y, epochs=200, plot_loss=True)
+    n.fit(X, y, epochs=400, plot_loss=True, batch_size=None)
 
     predictions = n.predict(X)
 
     correct = predictions[:, 0].round(0) == y[:, 0]
-    print("Train accuracy: ", sum(correct) / len(X))
+    print("Correct: %d/%d" % (sum(correct), len(correct)))
+    print("Accuracy: ", sum(correct) / len(correct))
 
 
 if __name__ == '__main__':

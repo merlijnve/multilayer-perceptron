@@ -13,12 +13,10 @@ class DenseLayer:
         self.weights = np.random.default_rng(42).uniform(
             low=-1.0, high=1.0, size=(input_size, output_size))
 
-    def forward(self, input: ndarray):
-        if len(input) != len(self.weights):
-            raise ValueError("Length of input must match length of weights")
-        self.input = input
+    def forward(self, inputs: ndarray):
+        self.input = inputs
         self.output = self.activation.function(
-            np.dot(input, self.weights) + self.bias)
+            np.dot(inputs, self.weights) + self.bias)
         return self.output
 
     def backward(self, loss_output):
@@ -26,7 +24,7 @@ class DenseLayer:
         input_gradient = np.dot(output_gradient, self.weights.T)
 
         self.weights += self.learning_rate * \
-            np.outer(self.input.T, output_gradient)
-        self.bias += self.learning_rate * output_gradient
+            np.dot(self.input.T, output_gradient)
+        self.bias += self.learning_rate * np.sum(output_gradient, axis=0)
 
         return input_gradient

@@ -5,7 +5,7 @@ import pickle
 import copy
 
 from DenseLayer import DenseLayer
-from support_functions import binary_cross_entropy_loss
+from support_functions import cross_entropy_loss
 from NormalizationLayer import NormalizationLayer
 
 
@@ -25,7 +25,7 @@ class NeuralNetwork:
         if isinstance(layer, NormalizationLayer) and index != 0:
             raise ValueError("Preprocessing layer must be first layer")
 
-    def __init__(self, layers: List[NormalizationLayer | DenseLayer]):
+    def __init__(self, layers: List[NormalizationLayer | DenseLayer], early_stopping_n_epochs=20):
         prev_layer_outputs = None
         for index, layer in enumerate(layers):
             if isinstance(layer, NormalizationLayer):
@@ -37,11 +37,12 @@ class NeuralNetwork:
         self.layers = layers
         self.best_val_loss = None
         self.best_epoch = 0
+        self.early_stopping_n_epochs = early_stopping_n_epochs
 
     def predict(self, inputs):
         if isinstance(self.best_layers[0], NormalizationLayer):
             inputs = self.best_layers[0].transform(inputs)
-        return np.array([self.feedforward(i, use_best=True) for i in inputs])
+        return self.feedforward(inputs, use_best=True)
 
     def feedforward(self, inputs, use_best=False):
         layers = self.layers if not use_best else self.best_layers
@@ -50,15 +51,15 @@ class NeuralNetwork:
                 inputs = layer.forward(inputs)
         return inputs
 
-    def backpropagate(self, target, outputs):
-        loss = target - outputs
+    def backpropagate(self, loss):
         for layer in reversed(self.layers):
             if isinstance(layer, DenseLayer):
                 loss = layer.backward(loss)
 
-    def training_step(self, input, target):
-        outputs = self.feedforward(input)
-        self.backpropagate(target, outputs)
+    def training_step(self, inputs, targets):
+        outputs = self.feedforward(inputs)
+        loss = targets - outputs
+        self.backpropagate(loss)
 
     def shuffle(self, inputs, targets, rng):
         p = rng.permutation(len(inputs))
@@ -71,18 +72,18 @@ class NeuralNetwork:
     def save_best_model(self, val_loss, epoch):
         if self.best_val_loss is None:
             self.best_val_loss = val_loss
-        if val_loss <= self.best_val_loss:
+        if self.best_val_loss is None or val_loss <= self.best_val_loss:
             self.best_val_loss = val_loss
             self.best_epoch = epoch
             self.best_layers = copy.deepcopy(self.layers)
 
-    def check_early_stopping(self, epoch, n_epochs=20):
-        if epoch >= self.best_epoch + n_epochs:
+    def check_early_stopping(self, epoch):
+        if epoch >= self.best_epoch + self.early_stopping_n_epochs:
             print("Early stopping...")
             return True
         return False
 
-    def fit(self, inputs, targets, epochs, plot_loss=False):
+    def fit(self, inputs, targets, epochs, plot_loss=False, batch_size=None):
         train_learning_curve = []
         val_learning_curve = []
         rng = np.random.default_rng(42)
@@ -95,27 +96,32 @@ class NeuralNetwork:
             inputs_train = self.layers[0].fit_transform(inputs_train)
             inputs_val = self.layers[0].transform(inputs_val)
 
+        if batch_size is not None and batch_size >= len(inputs_train):
+            print("Ignoring batch size (bigger than train set)")
         for epoch in range(epochs):
             inputs_train, targets_train = self.shuffle(
                 inputs_train, targets_train, rng)
 
-            for i, _ in enumerate(inputs_train):
-                self.training_step(inputs_train[i], targets_train[i])
+            if batch_size is not None and batch_size < len(inputs_train):
+                print("using batch")
+                self.training_step(
+                    inputs_train[:batch_size], targets_train[:batch_size])
+            else:
+                self.training_step(inputs_train, targets_train)
 
-            outputs_train = np.array([self.feedforward(i)
-                                     for i in inputs_train])
-            train_loss = binary_cross_entropy_loss(
+            outputs_train = self.feedforward(inputs_train)
+            train_loss = cross_entropy_loss(
                 targets_train, outputs_train)
 
-            outputs_val = np.array([self.feedforward(i) for i in inputs_val])
-            val_loss = binary_cross_entropy_loss(targets_val, outputs_val)
+            outputs_val = self.feedforward(inputs_val)
+            val_loss = cross_entropy_loss(targets_val, outputs_val)
             self.save_best_model(val_loss, epoch)
-            print("Epoch %3d/%d - Training loss: %.2f - Val loss: %.2f" %
+            print("Epoch %3d/%d - Training loss: %.4f - Val loss: %.4f" %
                   (epoch + 1, epochs, train_loss, val_loss))
 
             train_learning_curve.append(train_loss)
             val_learning_curve.append(val_loss)
-            if self.check_early_stopping(epoch, n_epochs=20):
+            if self.check_early_stopping(epoch):
                 break
 
         print("Best epoch: %d - Val loss: %.4f" %
