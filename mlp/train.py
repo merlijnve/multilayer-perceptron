@@ -8,7 +8,8 @@ from mlp.support_functions import read_cancer_dataset, calc_opposite_class
 
 
 def main():
-    cancer_data = read_cancer_dataset()
+    cancer_data = read_cancer_dataset(
+        "data/breast_cancer_data.csv_train", index_col=0)
 
     X = cancer_data[:, 1:]
     y = np.column_stack(
@@ -27,7 +28,7 @@ def main():
 
     correct = predictions[:, 0].round(0) == y[:, 0]
     print("Correct: %d/%d" % (sum(correct), len(correct)))
-    print("Accuracy: ", sum(correct) / len(correct))
+    print("Train + val accuracy: ", sum(correct) / len(correct))
 
 
 if __name__ == '__main__':

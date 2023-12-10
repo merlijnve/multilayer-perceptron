@@ -52,8 +52,12 @@ def calc_opposite_class(y):
     return np.array([0 if element == 1 else 1 for element in y])
 
 
-def read_cancer_dataset() -> np.ndarray:
-    cancer_data = read_csv('data/breast_cancer_data.csv',
-                           index_col=0)
-    cancer_data = categorize_binary_data(cancer_data, 0)
-    return np.array(cancer_data)
+def read_cancer_dataset(path: str, categorize=True, index_col=None) -> np.ndarray:
+    try:
+        cancer_data = read_csv(path, index_col=index_col)
+        if categorize:
+            cancer_data = categorize_binary_data(cancer_data, 0)
+        return np.array(cancer_data)
+    except Exception as e:
+        print(e)
+        exit(1)
