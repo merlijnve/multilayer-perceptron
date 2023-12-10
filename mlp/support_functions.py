@@ -9,12 +9,14 @@ def normalization(x):
 
 
 def binary_cross_entropy_loss(targets, outputs):
-    return -np.mean(targets * np.log(outputs) + (1 - targets) *
-                    np.log(1 - outputs))
+    epsilon = 1e-7  # to avoid log(0)
+    return -np.mean(targets * np.log(outputs + epsilon) + (1 - targets) *
+                    np.log(1 - outputs + epsilon))
 
 
 def cross_entropy_loss(targets, outputs):
-    return -np.mean(targets * np.log(outputs))
+    epsilon = 1e-7  # to avoid log(0)
+    return -np.mean(targets * np.log(outputs + epsilon))
 
 
 def to_float(value):
@@ -24,8 +26,21 @@ def to_float(value):
         return value
 
 
+def categorize_binary_data(data, y_col):
+    types = dict({"M": 0, "B": 1})
+
+    for index, row in enumerate(data):
+        data[index][y_col] = types[row[y_col]]
+    return data
+
+
+def calc_opposite_class(y):
+    return np.array([0 if element == 1 else 1 for element in y])
+
+
 def read_csv(filename, index_col=None):
     data = []
+
     with open(filename, 'r') as file:
         for line in file:
             split = line.strip().split(',')
@@ -36,23 +51,7 @@ def read_csv(filename, index_col=None):
     return data
 
 
-def categorize_binary_data(data, y_col):
-    types = dict()
-    val = 0
-
-    for index, row in enumerate(data):
-        if row[y_col] not in types:
-            types[row[y_col]] = val
-            val += 1
-        data[index][y_col] = types[row[y_col]]
-    return data
-
-
-def calc_opposite_class(y):
-    return np.array([0 if element == 1 else 1 for element in y])
-
-
-def read_cancer_dataset(path: str, categorize=True, index_col=None) -> np.ndarray:
+def read_cancer_dataset(path: str, categorize=True, index_col=None):
     try:
         cancer_data = read_csv(path, index_col=index_col)
         if categorize:

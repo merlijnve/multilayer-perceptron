@@ -3,6 +3,7 @@ from typing import List
 import numpy as np
 import pickle
 import copy
+import time
 
 from mlp.DenseLayer import DenseLayer
 from mlp.support_functions import cross_entropy_loss
@@ -111,6 +112,7 @@ class NeuralNetwork:
         plt.show()
 
     def fit(self, inputs, targets, epochs, plotting=False, batch_size=None):
+        t = time.time()
         rng = np.random.default_rng(42)
 
         inputs_train, inputs_val, targets_train, targets_val = self.split(
@@ -156,9 +158,10 @@ class NeuralNetwork:
 
         print("Best epoch: %d - Val loss: %.4f" %
               (self.best_epoch, self.best_val_loss))
-        print("Exporting best_model%.3f.pkl" %
+        print("Exporting model to file: best_model%.3f.pkl" %
               self.best_val_loss)
         pickle.dump(self, open("models/best_model%.3f.pkl" %
                     self.best_val_loss, "wb"))
+        print("Finished in %.2f seconds" % (time.time() - t))
         if plotting:
             self.plot_curves()

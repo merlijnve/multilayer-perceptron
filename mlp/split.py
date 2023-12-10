@@ -5,7 +5,7 @@ from mlp.support_functions import read_cancer_dataset
 def main():
     try:
         if len(sys.argv) != 3:
-            print("Usage: python3 split.py <filename> <test size in percentage>")
+            print("Usage: python3 split.py <filename> <test size in percent>")
             exit(1)
 
         cancer_data = read_cancer_dataset(

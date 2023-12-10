@@ -8,27 +8,26 @@ from mlp.support_functions import read_cancer_dataset, calc_opposite_class
 
 
 def main():
-    cancer_data = read_cancer_dataset(
-        "data/breast_cancer_data.csv_train", index_col=0)
+    try:
+        cancer_data = read_cancer_dataset(
+            "data/breast_cancer_data.csv_train", index_col=0)
 
-    X = cancer_data[:, 1:]
-    y = np.column_stack(
-        [cancer_data[:, 0], calc_opposite_class(cancer_data[:, 0])])
+        X = cancer_data[:, 1:]
+        y = np.column_stack(
+            [cancer_data[:, 0], calc_opposite_class(cancer_data[:, 0])])
 
-    n = NeuralNetwork([
-        NormalizationLayer(),
-        DenseLayer(X.shape[1], 64, Sigmoid(), learning_rate=0.01),
-        DenseLayer(64, 64, Sigmoid(), learning_rate=0.01),
-        DenseLayer(64, 2, Softmax(), learning_rate=0.1)
-    ], early_stopping_n_epochs=20)
+        n = NeuralNetwork([
+            NormalizationLayer(),
+            DenseLayer(X.shape[1], 64, Sigmoid(), learning_rate=0.01),
+            DenseLayer(64, 64, Sigmoid(), learning_rate=0.01),
+            DenseLayer(64, 2, Softmax(), learning_rate=0.1)
+        ], early_stopping_n_epochs=20)
 
-    n.fit(X, y, epochs=400, plotting=True, batch_size=None)
+        n.fit(X, y, epochs=400, plotting=True, batch_size=None)
 
-    predictions = n.predict(X)
-
-    correct = predictions[:, 0].round(0) == y[:, 0]
-    print("Correct: %d/%d" % (sum(correct), len(correct)))
-    print("Train + val accuracy: ", sum(correct) / len(correct))
+    except Exception as e:
+        print(e)
+        exit(1)
 
 
 if __name__ == '__main__':
