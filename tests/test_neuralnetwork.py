@@ -24,7 +24,7 @@ y = np.array([
 
 
 def train_nn():
-    n.fit(X, y, 50, plot_loss=False)
+    n.fit(X, y, 50, plotting=False)
 
     print("GUESSES")
     # Test the trained network

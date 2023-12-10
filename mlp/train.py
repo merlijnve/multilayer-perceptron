@@ -21,7 +21,7 @@ def main():
         DenseLayer(64, 2, Softmax(), learning_rate=0.1)
     ], early_stopping_n_epochs=20)
 
-    n.fit(X, y, epochs=400, plot_loss=True, batch_size=None)
+    n.fit(X, y, epochs=400, plotting=True, batch_size=None)
 
     predictions = n.predict(X)
 
