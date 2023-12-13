@@ -8,8 +8,8 @@ from mlp.support_functions import binary_cross_entropy_loss
 def main():
     try:
         if len(sys.argv) != 3:
-            print("""Usage: python3 predict.py <dataset filename>
-                  <model filename>""")
+            print("Usage: python3 predict.py <dataset filename> " +
+                  "<model filename>")
             exit(1)
 
         nn = pickle.load(open(sys.argv[2], 'rb'))
